@@ -4,6 +4,7 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import seaborn as sns
 import japanize_matplotlib
+from matplotlib.ticker import ScalarFormatter
 
 df_merge = pd.read_csv("../data/temp1/output/merge.csv")
 df_daily_sales = pd.read_csv("../data/temp1/output/daily_sales.csv")
@@ -16,62 +17,14 @@ df_merge['cancellation_date'] = pd.to_datetime(df_merge['cancellation_date'], fo
 df_daily_sales['transaction_date'] = pd.to_datetime(df_daily_sales['transaction_date'], format='%Y-%m-%d')
 df_daily_sales_detail['transaction_date'] = pd.to_datetime(df_daily_sales_detail['transaction_date'], format='%Y-%m-%d')
 
+st.set_page_config(layout="wide")
 
+st.title("Monthly Sales Report")
+st.write("The data is available from 2019.04.01 to 2020.10.01")
 
-st.title("Ecommerce Analytics Template")
-st.write("This template is to display the data for Ecommerce website.")
-
-### Daily Sales Report -------------------------
-st.header("1. Daily Sales Report")
-
-# Line Chart
-st.subheader("1-1. Line Graph - All Period")
-fig, ax = plt.subplots(figsize=(15,10))
-ax.plot(df_daily_sales['sales'], linestyle='-', color='green', label='sales')
-
-ax.set_title('Daily Sales')
-ax.set_xlabel('Dates')
-ax.set_ylabel('Sales')
-ax.legend()
-ax.grid(True)
-st.pyplot(fig)
-
-# Table
-st.subheader("1-2. Table View - All Period")
-st.dataframe(df_daily_sales)
-
-# Moving Average
-st.subheader("1-3. Moving Average - 30 days")
-
-df_daily_sales_moving_avg = df_daily_sales.copy()
-df_daily_sales_moving_avg['moving_avg'] = df_daily_sales_moving_avg['sales'].rolling(window=30).mean()
-
-start_date = "2020-01-01"
-end_date = "2020-03-30"
-df_daily_sales_moving_avg.set_index('transaction_date', inplace=True)
-df_daily_sales_moving_avg = df_daily_sales_moving_avg.loc[start_date:end_date]
-
-fig, ax = plt.subplots(figsize=(15,10))
-ax.plot(df_daily_sales_moving_avg.index, df_daily_sales_moving_avg['moving_avg'], linestyle='--', color='orange', label='30 days moving avg')
-
-ax.set_title('Daily Sales - 30 Days Moving Average')
-ax.set_xlabel('Dates')
-ax.set_ylabel('Sales - Moving Average')
-ax.legend()
-ax.grid(True)
-st.pyplot(fig)
-text_moving_average= """
-Moving average is a statistical method used to analyze a set of data points by creating a series of averages of different subsets of the full data set. 
-It is widely used in time series analysis to smooth out short-term fluctuations and highlight longer-term trends or cycles. 
-The 'moving' part is due to the window of data points used in the calculation as it moves across the data set.
-"""
-st.write(text_moving_average)
 
 ### Monthly Sales Report -------------------------
-st.header("2. Monthly Sales Report")
-
-# Line Chart
-st.subheader("2-1. Line Chart")
+st.header("Bar Chart")
 
 df_monthly_sales = df_daily_sales.copy()
 df_monthly_sales.set_index('transaction_date', inplace=True)
@@ -91,7 +44,7 @@ ax.grid(True)
 st.pyplot(fig)
 
 # Line Chart - Year Comparison
-st.subheader("2-1. Line Chart - Year Comparison")
+st.header("Line Chart - Year Comparison")
 
 df_monthly_sales_2019 = df_daily_sales_detail[df_daily_sales_detail['year'] == 2019].groupby("month").agg({"sales":"sum"}).reset_index()
 df_monthly_sales_2019.rename(columns={"sales": "2019_sales"}, inplace=True)
@@ -120,7 +73,7 @@ index = np.arange(df_monthly_sales_by_year.shape[0])
 bar1 = ax.bar(index, df_monthly_sales_by_year['2019_sales'], bar_width, color='lightgreen', label='2019 Sales')
 bar2 = ax.bar(index + bar_width, df_monthly_sales_by_year['2020_sales'], bar_width, color='green', label='2020 Sales')
 
-from matplotlib.ticker import ScalarFormatter
+
 y_formatter = ScalarFormatter(useOffset=False)
 y_formatter.set_scientific(False)
 ax.yaxis.set_major_formatter(y_formatter)
@@ -135,11 +88,8 @@ ax.grid(True)
 st.pyplot(fig)
 
 # Table View - Year Comparison
-st.subheader("2-3. Table View - Year Comparison")
-
-df_monthly_sales_by_year.index.name = 'Month'
-
-df_monthly_sales_by_year_reset = df_monthly_sales_by_year.reset_index()
-st.table(df_monthly_sales_by_year_reset)
+df_monthly_sales_by_year_table = df_monthly_sales_by_year.copy()
+df_monthly_sales_by_year_table = df_monthly_sales_by_year_table.reset_index()
+st.dataframe(df_monthly_sales_by_year_table, height=457, width=500,hide_index=True)
 
 
