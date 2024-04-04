@@ -6,9 +6,9 @@ import seaborn as sns
 import japanize_matplotlib
 from matplotlib.ticker import ScalarFormatter
 
-df_merge = pd.read_csv("../data/temp1/output/merge.csv")
-df_daily_sales = pd.read_csv("../data/temp1/output/daily_sales.csv")
-df_daily_sales_detail = pd.read_csv("../data/temp1/output/daily_sales_detail.csv")
+df_merge = pd.read_csv("data/temp1/output/merge.csv")
+df_daily_sales = pd.read_csv("data/temp1/output/daily_sales.csv")
+df_daily_sales_detail = pd.read_csv("data/temp1/output/daily_sales_detail.csv")
 
 df_merge['birth_date'] = pd.to_datetime(df_merge['birth_date'], format='%Y-%m-%d')
 df_merge['transaction_date'] = pd.to_datetime(df_merge['transaction_date'], format='%Y-%m-%d')
@@ -91,5 +91,3 @@ st.pyplot(fig)
 df_monthly_sales_by_year_table = df_monthly_sales_by_year.copy()
 df_monthly_sales_by_year_table = df_monthly_sales_by_year_table.reset_index()
 st.dataframe(df_monthly_sales_by_year_table, height=457, width=500,hide_index=True)
-
-
