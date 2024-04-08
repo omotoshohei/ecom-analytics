@@ -36,6 +36,10 @@ df_monthly_sales.index = df_monthly_sales.index.strftime('%Y-%m')
 fig, ax = plt.subplots(figsize=(15,10))
 ax.bar(df_monthly_sales.index, df_monthly_sales['sales'], color='green', label='Monthly Sales')
 
+y_formatter = ScalarFormatter(useOffset=False)
+y_formatter.set_scientific(False)
+ax.yaxis.set_major_formatter(y_formatter)
+
 ax.set_title('Monthly Sales')
 ax.set_xlabel('Month')
 ax.set_ylabel('Sales')
