@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import japanize_matplotlib
 from matplotlib.ticker import ScalarFormatter
+from matplotlib.ticker import MaxNLocator
+
 
 df_merge = pd.read_csv("data/temp1/output/merge.csv")
 df_daily_sales = pd.read_csv("data/temp1/output/daily_sales.csv")
@@ -23,8 +25,9 @@ st.title("Weekly Sales Report")
 st.write("The data is available from 2019.04.01 to 2020.10.01")
 
 
-### Weekly Sales Report -------------------------
-st.header("Line Chart")
+### ----------------------------------------------------------------------------------------------------
+### ----------------------------------------------------------------------------------------------------
+st.header("1. Line Chart")
 
 df_weekly_sales = df_daily_sales.copy()
 df_weekly_sales['transaction_date'] = pd.to_datetime(df_weekly_sales['transaction_date'])
@@ -46,8 +49,9 @@ ax.legend()
 ax.grid(True)
 st.pyplot(fig)
 
-
-st.header("Line Chart - Year Comparison")
+### ----------------------------------------------------------------------------------------------------
+### ----------------------------------------------------------------------------------------------------
+st.header("2. Bar Chart - Year Comparison")
 
 df_weekly_sales_2019 = df_daily_sales_detail[df_daily_sales_detail['year'] == 2019].groupby("week").agg({"sales":"sum"}).reset_index()
 df_weekly_sales_2019.rename(columns={"sales": "2019_sales"}, inplace=True)
@@ -76,7 +80,7 @@ index = np.arange(df_weekly_sales_by_year.shape[0])
 bar1 = ax.bar(index, df_weekly_sales_by_year['2019_sales'], bar_width, color='lightgreen', label='2019 Sales')
 bar2 = ax.bar(index + bar_width, df_weekly_sales_by_year['2020_sales'], bar_width, color='green', label='2020 Sales')
 
-
+# fix y-axis to show the exact number
 y_formatter = ScalarFormatter(useOffset=False)
 y_formatter.set_scientific(False)
 ax.yaxis.set_major_formatter(y_formatter)
@@ -95,3 +99,33 @@ df_weekly_sales_by_year_table = df_weekly_sales_by_year.copy()
 df_weekly_sales_by_year_table = df_weekly_sales_by_year_table.reset_index()
 st.dataframe(df_weekly_sales_by_year_table, height=1890, width=500,hide_index=True)
 
+### ----------------------------------------------------------------------------------------------------
+### ----------------------------------------------------------------------------------------------------
+st.header("3. Weekly Sales by Category")
+df_merge['transaction_week'] = df_merge['transaction_date'].dt.strftime('%Y-%U')
+df_weekly_sales_by_category = pd.pivot_table(df_merge, index='transaction_week', columns='category', values=['sales'],aggfunc='sum')
+
+fig, ax = plt.subplots()
+ax.plot(df_weekly_sales_by_category.index, df_weekly_sales_by_category['sales', 'タブレット'], label='タブレット')
+ax.plot(df_weekly_sales_by_category.index, df_weekly_sales_by_category['sales', 'デスクトップ'], label='デスクトップ')
+ax.plot(df_weekly_sales_by_category.index, df_weekly_sales_by_category['sales', 'ノートPC'], label='ノートPC')
+ax.plot(df_weekly_sales_by_category.index, df_weekly_sales_by_category['sales', '周辺機器'], label='周辺機器')
+
+# Fix the y-axis to show the exact number
+y_formatter = ScalarFormatter(useOffset=False)
+y_formatter.set_scientific(False)
+ax.yaxis.set_major_formatter(y_formatter)
+
+# Rotate x-axis labels and set their font size
+ax.tick_params(axis='x', labelsize=7, rotation=45)
+
+# Set the y-axis label font size
+ax.tick_params(axis='y', labelsize=7)
+
+# Ensure only a certain number of labels are shown
+ax.xaxis.set_major_locator(MaxNLocator(integer=True, prune='both', nbins=10))
+
+# Show legend
+ax.legend()
+# Display the plot in Streamlit
+st.pyplot(fig)

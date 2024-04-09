@@ -26,7 +26,7 @@ if 'authenticated' not in st.session_state:
     st.session_state['authenticated'] = False
 
 # Display the introduction on the home page
-st.title('Daily Sales Report')
+st.title('Insight')
 st.write("The data is available from 2019.04.01 to 2020.10.01")
 
 

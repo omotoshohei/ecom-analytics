@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import japanize_matplotlib
 from matplotlib.ticker import ScalarFormatter
+from matplotlib.ticker import MaxNLocator
+
 
 df_merge = pd.read_csv("data/temp1/output/merge.csv")
 df_daily_sales = pd.read_csv("data/temp1/output/daily_sales.csv")
@@ -24,7 +26,7 @@ st.write("The data is available from 2019.04.01 to 2020.10.01")
 
 
 ### Monthly Sales Report -------------------------
-st.header("Bar Chart")
+st.header("1. Bar Chart")
 
 df_monthly_sales = df_daily_sales.copy()
 df_monthly_sales.set_index('transaction_date', inplace=True)
@@ -48,7 +50,7 @@ ax.grid(True)
 st.pyplot(fig)
 
 # Line Chart - Year Comparison
-st.header("Line Chart - Year Comparison")
+st.header("2. Bar Chart - Year Comparison")
 
 df_monthly_sales_2019 = df_daily_sales_detail[df_daily_sales_detail['year'] == 2019].groupby("month").agg({"sales":"sum"}).reset_index()
 df_monthly_sales_2019.rename(columns={"sales": "2019_sales"}, inplace=True)
@@ -95,3 +97,35 @@ st.pyplot(fig)
 df_monthly_sales_by_year_table = df_monthly_sales_by_year.copy()
 df_monthly_sales_by_year_table = df_monthly_sales_by_year_table.reset_index()
 st.dataframe(df_monthly_sales_by_year_table, height=457, width=500,hide_index=True)
+
+
+# Sales by Category
+st.header("3. Monthly Sales by Category")
+df_merge['transaction_month'] = df_merge['transaction_date'].dt.strftime("%Y%m")
+df_monthly_sales_by_category = pd.pivot_table(df_merge, index='transaction_month', columns='category', values=['sales'],aggfunc='sum')
+
+fig, ax = plt.subplots()
+ax.plot(df_monthly_sales_by_category.index, df_monthly_sales_by_category['sales', 'タブレット'], label='タブレット')
+ax.plot(df_monthly_sales_by_category.index, df_monthly_sales_by_category['sales', 'デスクトップ'], label='デスクトップ')
+ax.plot(df_monthly_sales_by_category.index, df_monthly_sales_by_category['sales', 'ノートPC'], label='ノートPC')
+ax.plot(df_monthly_sales_by_category.index, df_monthly_sales_by_category['sales', '周辺機器'], label='周辺機器')
+
+# Fix the y-axis to show the exact number
+y_formatter = ScalarFormatter(useOffset=False)
+y_formatter.set_scientific(False)
+ax.yaxis.set_major_formatter(y_formatter)
+
+# Rotate x-axis labels and set their font size
+ax.tick_params(axis='x', labelsize=7, rotation=45)
+
+# Set the y-axis label font size
+ax.tick_params(axis='y', labelsize=7)
+
+# Ensure only a certain number of labels are shown
+ax.xaxis.set_major_locator(MaxNLocator(integer=True, prune='both', nbins=10))
+
+# Show legend
+ax.legend()
+
+# Display the plot in Streamlit
+st.pyplot(fig)

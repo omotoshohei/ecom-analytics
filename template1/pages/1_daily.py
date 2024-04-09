@@ -121,7 +121,6 @@ st.pyplot(fig)
 # Moving Average
 st.subheader("2-2. Daily Sales - 30 Days Moving Average ")
 
-
 df_daily_sales_moving_avg = df_daily_sales.copy()
 df_daily_sales_moving_avg['moving_avg'] = df_daily_sales_moving_avg['sales'].rolling(window=30).mean()
 
@@ -149,3 +148,25 @@ The 'moving' part is due to the window of data points used in the calculation as
 st.write(text_moving_average)
 
 
+# Sales by Category
+st.subheader("2-3. Daily Sales by Category")
+
+df_daily_sales_by_category = pd.pivot_table(df_merge, index='transaction_date', columns='category', values=['sales'],aggfunc='sum')
+df_daily_sales_by_category = df_daily_sales_by_category.loc[start_date:end_date]
+fig, ax = plt.subplots()
+
+y_formatter = ScalarFormatter(useOffset=False)
+y_formatter.set_scientific(False)
+ax.yaxis.set_major_formatter(y_formatter)
+ax.plot(df_daily_sales_by_category.index, df_daily_sales_by_category['sales', 'タブレット'], label='タブレット')
+ax.plot(df_daily_sales_by_category.index, df_daily_sales_by_category['sales', 'デスクトップ'], label='デスクトップ')
+ax.plot(df_daily_sales_by_category.index, df_daily_sales_by_category['sales', 'ノートPC'], label='ノートPC')
+ax.plot(df_daily_sales_by_category.index, df_daily_sales_by_category['sales', '周辺機器'], label='周辺機器')
+# Rotate x-axis labels and set their font size
+ax.tick_params(axis='x', labelsize=7, rotation=45)
+
+# Set the y-axis label font size
+ax.tick_params(axis='y', labelsize=7)
+
+ax.legend()
+st.pyplot(fig)
